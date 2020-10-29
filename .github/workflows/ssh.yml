@@ -9,7 +9,10 @@ jobs:
           target_arch: [x86_64]
         runs-on: ubuntu-latest
         steps:
-        - name: Starting Tmate
+        - name: Clone repository
+          uses: actions/checkout@v2
+          
+        - name: Pre configuration
           run: |
                 sudo apt update 
                 sudo apt install neofetch 
