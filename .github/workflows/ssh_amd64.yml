@@ -46,7 +46,7 @@ jobs:
           \`ssh $ARCH/git@subdomain.tmate.io\` %0A\
           Ngrok: \`ssh -p $port runner@$host\`"
           for USER in $USERS
-          do curl "https://api.telegram.org/bot$BOT_TOKEN/sendMessage?chat_id=$USER&text=$msg"
+          do curl "https://api.telegram.org/bot$BOT_TOKEN/sendMessage?chat_id=$USER&text=$msg&parse_mode=MarkdownV2"
           done
 
       - name: Start tmate
