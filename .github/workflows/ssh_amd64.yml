@@ -6,7 +6,7 @@ jobs:
     job1:
       strategy:
         matrix:
-        target_arch: [x86_64]
+         target_arch: [x86_64]
       runs-on: ubuntu-latest
       env:
         ARCH: amd64
