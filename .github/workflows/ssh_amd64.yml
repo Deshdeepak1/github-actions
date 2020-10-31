@@ -47,7 +47,7 @@ jobs:
           port=`echo $ng_url| cut -d ':' -f3`
           msg="$ARCH:%0A\
           Password: $PASSWD%0A\
-          Tmate: `ssh $ARCH/$NAME@subdomain.tmate.io\`%0A\
+          Tmate: \`ssh $ARCH/$NAME@subdomain.tmate.io\`%0A\
           Ngrok: \`ssh -p $port runner@$host\`"
           for USER in $USERS
           do curl "https://api.telegram.org/bot$BOT_TOKEN/sendMessage?chat_id=$USER&text=$msg&parse_mode=MarkdownV2"
