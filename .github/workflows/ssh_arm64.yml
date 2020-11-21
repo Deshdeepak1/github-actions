@@ -1,0 +1,63 @@
+name: ssh
+on: 
+ workflow_dispatch
+
+jobs:
+    job1:
+      strategy:
+        matrix:
+         target_arch: [arm64]
+      runs-on: ubuntu-latest
+      env:
+        ARCH: arm64
+      steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+        
+      - name: Pre configuration
+        env:
+          PASSWD: ${{ secrets.PASSWD }}
+        run: |
+          sudo apt update 
+          sudo apt install neofetch
+          sudo snap install ngrok
+          sudo /usr/sbin/sshd
+          echo -e "$PASSWD\n$PASSWD" | sudo passwd runner
+          echo -e "\nexport PS1='\u@\h:\w\$ '" | sudo tee -a /etc/bash.bashrc
+          echo -e "\nneofetch" | sudo tee -a /etc/bash.bashrc
+          ln -s /home/runner/work/github-actions/github-actions ~/repo
+
+      - name: Start ngrok
+        env:
+          AUTHTOKEN: ${{ secrets.NGROK_AUTH_ARM64}}
+        run: |
+          ngrok authtoken $AUTHTOKEN
+          ngrok tcp -region ap 22 >/dev/null &
+          sleep 5
+          
+      - name: Send Telegram msg
+        env: 
+          BOT_TOKEN: ${{ secrets.GIT_SSH_BOT_TOKEN }}
+          USERS: ${{ secrets.USERS }}
+          NAME: ${{ secrets.TMATE_NAME }}
+          PASSWD: ${{ secrets.PASSWD }}
+        run: |
+          ng_url=`curl -s http://localhost:4040/api/tunnels | grep -o tcp://[0-9a-z.:]*`
+          host=`echo $ng_url| cut -d ':' -f2|cut -c3-`
+          port=`echo $ng_url| cut -d ':' -f3`
+          msg="$ARCH:%0A\
+          Password: $PASSWD%0A\
+          Tmate: \`ssh $ARCH/$NAME@subdomain.tmate.io\`%0A\
+          Ngrok: \`ssh -p $port runner@$host\`"
+          for USER in $USERS
+          do curl -s -o /dev/null "https://api.telegram.org/bot$BOT_TOKEN/sendMessage?chat_id=$USER&text=$msg&parse_mode=MarkdownV2"
+          done
+
+      - name: Start tmate
+        env:
+          TMATE_API: ${{ secrets.TMATE_API_ARM64 }}
+          NAME: ${{ secrets.TMATE_NAME }}
+        run: |
+          wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-$ARCH.tar.xz &> /dev/null
+          tar -xf tmate-2.4.0-static-linux-$ARCH.tar.xz
+          $PWD/tmate-2.4.0-static-linux-$ARCH/tmate -F -k $TMATE_API -n $NAME >/dev/null
