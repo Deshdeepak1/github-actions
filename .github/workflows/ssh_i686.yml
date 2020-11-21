@@ -1,4 +1,4 @@
-name: ssh
+name: ssh_i686
 on: 
  workflow_dispatch
 
