@@ -1,4 +1,4 @@
-name: ssh
+name: ssh_arm64
 on: 
  workflow_dispatch
 
